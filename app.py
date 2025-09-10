@@ -1,16 +1,15 @@
 import gradio as gr
 import requests
 import logging
+import os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("HRPolicyAssistant-Frontend")
 
-API_URL = "https://hr-assistant-rg-fkb4dxf2duguabae.centralus-01.azurewebsites.net/ask"
-
+API_URL = os.getenv("API_URL", "https://hr-assistant-rg-fkb4dxf2duguabae.centralus-01.azurewebsites.net/ask")
 
 def chat_with_hr(user_message, chat_history):
-    # Build request payload with full conversation
     payload = {
         "messages": [
             {"role": "user", "content": u} if i % 2 == 0 else {"role": "assistant", "content": a}
@@ -40,11 +39,10 @@ def chat_with_hr(user_message, chat_history):
         chat_history.append((user_message, error_message))
         return chat_history, chat_history, ""  
 
-
 def reset_chat():
     return [], [], ""
 
-
+# Gradio UI
 with gr.Blocks(
     title="🏢 HR Policy Assistant",
     theme=gr.themes.Soft(),
@@ -99,5 +97,13 @@ with gr.Blocks(
                 """
             )
 
+# Queue for concurrency
+demo.queue()
+
+# Mount Gradio into FastAPI app for Azure
+app = gr.mount_gradio_app(app=None, blocks=demo, path="/")
+
+# Local run (useful before deploying to Azure)
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=8000)
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
