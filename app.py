@@ -97,13 +97,7 @@ with gr.Blocks(
                 """
             )
 
-# Queue for concurrency
 demo.queue()
 
-# Mount Gradio into FastAPI app for Azure
 app = gr.mount_gradio_app(app=None, blocks=demo, path="/")
 
-# Local run (useful before deploying to Azure)
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
