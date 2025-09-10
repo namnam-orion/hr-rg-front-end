@@ -2,6 +2,7 @@ import gradio as gr
 import requests
 import logging
 import os
+from fastapi import FastAPI
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -98,6 +99,10 @@ with gr.Blocks(
             )
 
 demo.queue()
+fastapi_app = FastAPI()
+app = gr.mount_gradio_app(fastapi_app, demo, path="/")
 
-app = gr.mount_gradio_app(app=None, blocks=demo, path="/")
 
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
